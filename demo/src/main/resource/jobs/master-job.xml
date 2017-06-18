@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:batch="http://www.springframework.org/schema/batch"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-jms="http://www.springframework.org/schema/integration/jms"
+	xsi:schemaLocation="http://www.springframework.org/schema/batch
+    http://www.springframework.org/schema/batch/spring-batch.xsd
+    http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/integration/jms
+    http://www.springframework.org/schema/integration/jms/spring-integration-jms.xsd
+    http://www.springframework.org/schema/integration
+    http://www.springframework.org/schema/integration/spring-integration.xsd
+    ">
+
+	<batch:job id="master-job">
+		<batch:step id="master-step">
+			<batch:partition partitioner="partitioner" handler="partitionHandler" />
+		</batch:step>
+	</batch:job>
+
+	<bean id="partitioner" class="com.mycompany.springbatch.demo.MasterPartitioner" />
+
+	<bean id="partitionHandler" class="com.mycompany.springbatch.demo.MasterPartitionHandler">
+		<property name="stepName" value="slave-step" />
+		<property name="gridSize" value="4" />
+		<property name="messagingGateway" ref="messagingGateway">
+		</property>
+	</bean>
+
+	<bean id="messagingGateway" class="com.mycompany.springbatch.demo.message.SimpleJdbcMessage">
+		<property name="receiveTimeout" value="60000" />
+	</bean>
+
+</beans>
